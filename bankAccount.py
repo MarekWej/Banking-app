@@ -1,3 +1,4 @@
+
 class BankAccount:
 
     def __init__(self, balance, owner, payout_limit, interest_rate=0.01):
@@ -70,15 +71,3 @@ class BankAccount:
         self.calculate_and_add_interest(interest_rate)
 
 
-acc = BankAccount(balance=1000, owner="john", payout_limit=1000)
-acc1 = BankAccount(balance=2000, owner="Sam", payout_limit=500)
-
-acc.deposit(5)
-acc.payout(900)
-acc.deposit(2000)
-acc.payout(2000)
-print("Current balance:", acc.get_balance())
-acc.history_of_the_transactions()
-acc.interest_transactions()
-acc.payout(1100)
-acc1.payout(400)
