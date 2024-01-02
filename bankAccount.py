@@ -1,12 +1,12 @@
-
 class BankAccount:
 
-    def __init__(self, balance, owner, payout_limit, interest_rate=0.01):
+    def __init__(self, balance, owner, payout_limit, interest_rate=0.01, password=None):
         self.balance = balance
         self.owner = owner
         self.transaction_history = []
         self.payout_limit = payout_limit
         self.interest_rate = interest_rate
+        self.password = password
 
     def deposit(self, amount):
         if amount > 0:
@@ -26,7 +26,7 @@ class BankAccount:
             else:
                 print(f"The payout amount exceeds the limit of {self.payout_limit}")
         else:
-            print("Payout must be higher than 0")
+            print("Insufficient funds for the requested payout")
 
     def set_transactions_limit(self, amount):
         if amount >= 0:
@@ -70,4 +70,18 @@ class BankAccount:
         interest_rate = 0.01
         self.calculate_and_add_interest(interest_rate)
 
+    def authenticate(self, entered_password):
+        if self.password is not None and entered_password == str(self.password):
+            print("Authentication successful.")
+            return True
+        else:
+            print("Wrong password")
+            return False
 
+    def account_access_by_password(self):
+        entered_password = input("Please enter here your password: ")
+        if self.authenticate(entered_password):
+            print("Access granted")
+            return True
+        else:
+            print("Account access blocked")

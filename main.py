@@ -1,26 +1,87 @@
 from bankAccount import BankAccount
 from savingsBankAccount import SavingsAccount
 
-acc = BankAccount(balance=1000, owner="john", payout_limit=1000)
-acc1 = BankAccount(balance=2000, owner="Sam", payout_limit=500)
 
-acc.deposit(5)
-acc.payout(900)
-acc.deposit(2000)
-acc.payout(2000)
-print("Current balance:", acc.get_balance())
-acc.history_of_the_transactions()
-acc.interest_transactions()
-acc.payout(1100)
-acc1.payout(400)
+def create_account():
+    print("Creating a new account:")
+    owner = input("Enter your name: ")
+    initial_balance = float(input("Enter the initial balance: "))
+    payout_limit = float(input("Enter the payout limit: "))
+    password = str(input("Set a password for your account: "))
 
-print("\nOperations on the savings account:")
-savings_acc = SavingsAccount(balance=2000, owner="Alice", payout_limit=500, interest_rate=0.03, withdrawal_limit=2)
-savings_acc.deposit(500)
-savings_acc.payout(200)
-savings_acc.payout(100)
-savings_acc.payout(50)
-savings_acc.payout(50)  # Exceeding the withdrawal limit
-savings_acc.interest_transactions()
-print("Current balance of the savings account:", savings_acc.get_balance())
-savings_acc.history_of_the_transactions()
+    account_type = input("Do you want to create a Savings account? (yes/no): ".lower())
+
+    if account_type == "yes":
+        interest_rate = float(input("Enter the interest rate for the Saving account: "))
+        withdrawal_limit = int(input("Enter the withdrawal limit for the Savings Account: "))
+        new_account = SavingsAccount(balance=initial_balance, owner=owner, payout_limit=payout_limit,
+                                                   interest_rate=interest_rate, withdrawal_limit=withdrawal_limit,
+                                                   password=password)
+    else:
+        new_account = BankAccount(balance=initial_balance, owner=owner, payout_limit=payout_limit, password=password)
+
+    print("Account created successfully.")
+    return new_account
+
+def main():
+    print("Welcome to the banking system!")
+
+    while True:
+        user_choice = input("Do you have an account? (yes/no): ".lower())
+
+        if user_choice == "yes":
+            entered_password = input("Please enter your password: ")
+            account = BankAccount(balance=0, owner="", payout_limit=0, password="")
+            if account.authenticate(entered_password):
+                break
+            else:
+                print("invalid password. Try again.")
+
+        elif user_choice == "no":
+            account = create_account()
+            break
+
+        else:
+            print("Invalid choice. Please enter 'yes' or 'no'.")
+
+    while True:
+        print("\nMenu:")
+        print("1. Deposit")
+        print("2. Payout")
+        print("3. Check Balance")
+        print("4. Transaction History")
+        print("5. Quit")
+
+        choice = input("Enter your choice (1-5): ")
+
+        if choice == "1":
+            amount = float(input("Enter the deposit amount: "))
+            account.deposit(amount)
+            print("Current balance: {}".format(account.get_balance()))
+
+        elif choice == "2":
+            amount = float(input("Enter the payout amount: "))
+            account.payout(amount)
+            print("Current balance: {}".format(account.get_balance()))
+
+        elif choice == "3":
+            print("Current balance: {}".format(account.get_balance()))
+
+        elif choice == "4":
+            account.history_of_the_transactions()
+
+        elif choice == "5":
+            print("Exiting the program. Goodbye!")
+            break
+
+        else:
+            print("Invalid choice. Please enter a number between 1 and 5")
+
+if __name__ == "__main__":
+    main()
+
+
+
+
+
+
