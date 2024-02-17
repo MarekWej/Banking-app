@@ -72,7 +72,10 @@ def main():
 
         elif choice == "5":
             target_currency = input("Enter the target currency (e.g., USD, EUR): ").upper()
-            account.convert_balance(target_currency)
+            if account.balance > 0:
+                account.convert_balance(target_currency)
+            else:
+                print("You don't have sufficient funds to convert.")
 
         elif choice == "6":
             print("Exiting the program. Goodbye!")
