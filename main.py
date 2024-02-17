@@ -1,7 +1,6 @@
 from bankAccount import BankAccount
 from savingsBankAccount import SavingsAccount
 
-
 def create_account():
     print("Creating a new account:")
     owner = input("Enter your name: ")
@@ -50,7 +49,8 @@ def main():
         print("2. Payout")
         print("3. Check Balance")
         print("4. Transaction History")
-        print("5. Quit")
+        print("5. Currency conversion")
+        print("6. Quit")
 
         choice = input("Enter your choice (1-5): ")
 
@@ -71,6 +71,10 @@ def main():
             account.history_of_the_transactions()
 
         elif choice == "5":
+            target_currency = input("Enter the target currency (e.g., USD, EUR): ").upper()
+            account.convert_balance(target_currency)
+
+        elif choice == "6":
             print("Exiting the program. Goodbye!")
             break
 
@@ -79,9 +83,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
-

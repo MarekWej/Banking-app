@@ -1,3 +1,5 @@
+from currency_exchange import get_exchange_rate
+
 class BankAccount:
 
     def __init__(self, balance, owner, payout_limit, interest_rate=0.01, password=None):
@@ -85,3 +87,15 @@ class BankAccount:
             return True
         else:
             print("Account access blocked")
+
+    def convert_balance(self, target_currency):
+        base_currency = 'PLN'
+        exchange_rate = get_exchange_rate(base_currency, target_currency)
+        if exchange_rate:
+            converted_balance = self.balance * exchange_rate
+            print(f"Your balance in {target_currency}: {converted_balance}")
+            return converted_balance
+        else:
+            print("Conversion failed")
+            return None
+
