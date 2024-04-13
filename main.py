@@ -3,6 +3,7 @@ from savingsBankAccount import SavingsAccount
 
 def create_account():
     print("Creating a new account:")
+    account_id = input("Enter your account ID: ")
     owner = input("Enter your name: ")
     initial_balance = float(input("Enter the initial balance: "))
     payout_limit = float(input("Enter the payout limit: "))
@@ -13,33 +14,45 @@ def create_account():
     if account_type == "yes":
         interest_rate = float(input("Enter the interest rate for the Saving account: "))
         withdrawal_limit = int(input("Enter the withdrawal limit for the Savings Account: "))
-        new_account = SavingsAccount(balance=initial_balance, owner=owner, payout_limit=payout_limit,
+        new_account = SavingsAccount(account_id, balance=initial_balance, owner=owner, payout_limit=payout_limit,
                                                    interest_rate=interest_rate, withdrawal_limit=withdrawal_limit,
                                                    password=password)
     else:
-        new_account = BankAccount(balance=initial_balance, owner=owner, payout_limit=payout_limit, password=password)
+        new_account = BankAccount(account_id, balance=initial_balance, owner=owner, payout_limit=payout_limit, password=password)
+    # Save your account details to a pickle file
+    new_account.save_account_data()
 
     print("Account created successfully.")
     return new_account
+
+def login():
+    print("Login to your account:")
+    account_id = input("Enter your account ID: ")
+    password = input("Enter your password: ")
+
+    account = BankAccount(account_id, balance=0, owner="", payout_limit=0, password="")
+    account.load_account_data()
+
+    if account.password == password:
+        print("Login successful!")
+        return account
+    else:
+        print("Invalid password.")
+        return None
 
 def main():
     print("Welcome to the banking system!")
 
     while True:
-        user_choice = input("Do you have an account? (yes/no): ".lower())
+        user_choice = input("Do you have an account? (yes/no): ").lower()
 
         if user_choice == "yes":
-            entered_password = input("Please enter your password: ")
-            account = BankAccount(balance=0, owner="", payout_limit=0, password="")
-            if account.authenticate(entered_password):
+            account = login()
+            if account:
                 break
-            else:
-                print("invalid password. Try again.")
-
         elif user_choice == "no":
             account = create_account()
             break
-
         else:
             print("Invalid choice. Please enter 'yes' or 'no'.")
 

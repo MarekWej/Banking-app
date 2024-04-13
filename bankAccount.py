@@ -1,8 +1,13 @@
+import os.path
+
 from currency_exchange import get_exchange_rate
+import pickle
+
 
 class BankAccount:
 
-    def __init__(self, balance, owner, payout_limit, interest_rate=0.01, password=None):
+    def __init__(self, account_id, balance, owner, payout_limit, interest_rate=0.01, password=None):
+        self.account_id = account_id
         self.balance = balance
         self.owner = owner
         self.transaction_history = []
@@ -10,10 +15,39 @@ class BankAccount:
         self.interest_rate = interest_rate
         self.password = password
 
+
+    # Method to save account data to file
+    def save_account_data(self):
+        data = {
+            'account_id': self.account_id,
+            'balance': self.balance,
+            'owner': self.owner,
+            'transaction_history': self.transaction_history,
+            'payout_limit': self.payout_limit,
+            'interest_rate': self.interest_rate,
+            'password': self.password
+        }
+        with open(f"{self.account_id}_account.pkl", "wb") as file:
+            pickle.dump(data, file)
+
+    # Method for loading account information from a file
+    def load_account_data(self):
+        if os.path.exists(f"{self.account_id}_account.pkl"):
+            with open(f"{self.account_id}_account.pkl", "rb") as file:
+                data = pickle.load(file)
+                self.account_id = data['account_id']
+                self.balance = data['balance']
+                self.owner = data['owner']
+                self.transaction_history = data['transaction_history']
+                self.payout_limit = data['payout_limit']
+                self.interest_rate = data['interest_rate']
+                self.password = data['password']
+
     def deposit(self, amount):
         if amount > 0:
             self.balance += amount
             self.add_transaction("Deposit", amount)
+            self.save_account_data()  # Save data after deposit
             print(f'Value {amount} has been added to your bank account, your funds in your account are {self.balance} ')
         else:
             print(f"Sorry sir, we cannot add this value: {amount} to your account")
@@ -23,6 +57,7 @@ class BankAccount:
             if amount <= self.payout_limit:
                 self.balance -= amount
                 self.add_transaction("Payout", amount)
+                self.save_account_data()  # Save the data after payment
                 print(
                     f"The payment for the amount {amount} has been processed, your funds in your account are {self.balance} ")
             else:
