@@ -135,14 +135,10 @@ class BankAccountGUI:
     def currency_conversion(self):
         currencies = ["USD", "EUR", "GBP", "AUD"]
         dialog = CurrencyConversionDialog(self.root, currencies)
-        dialog.wait_window()  # Czekaj na zamknięcie okna dialogowego
+        dialog.wait_window()
+        self.convert(dialog, currencies)
 
-        # Sprawdź, czy dialog został zamknięty poprawnie
-        if dialog.amount is not None:
-            self.convert(dialog)
-
-    def convert(self, dialog):
-        currencies = ["USD", "EUR", "GBP", "AUD"]  # Przeniesienie definicji currencies do metody convert
+    def convert(self, dialog, currencies):
         target_currency = dialog.currency_var.get()
         amount = dialog.amount
         if self.account.balance > 0:
