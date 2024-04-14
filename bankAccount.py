@@ -1,11 +1,8 @@
 import os.path
-
-from currency_exchange import get_exchange_rate
 import pickle
-
+from currency_exchange import get_exchange_rate
 
 class BankAccount:
-
     def __init__(self, account_id, balance, owner, payout_limit, interest_rate=0.01, password=None):
         self.account_id = account_id
         self.balance = balance
@@ -15,8 +12,21 @@ class BankAccount:
         self.interest_rate = interest_rate
         self.password = password
 
+    @classmethod
+    def load_account_data(cls, account_id, password):
+        filename = f"{account_id}_account.pkl"
+        if os.path.exists(filename):
+            with open(filename, "rb") as file:
+                data = pickle.load(file)
+                if data['password'] == password:
+                    return cls(account_id=data['account_id'], balance=data['balance'], owner=data['owner'],
+                               payout_limit=data['payout_limit'], interest_rate=data['interest_rate'],
+                               password=data['password'])
+                else:
+                    return None
+        else:
+            return None
 
-    # Method to save account data to file
     def save_account_data(self):
         data = {
             'account_id': self.account_id,
@@ -30,27 +40,14 @@ class BankAccount:
         with open(f"{self.account_id}_account.pkl", "wb") as file:
             pickle.dump(data, file)
 
-    # Method for loading account information from a file
-    def load_account_data(self):
-        if os.path.exists(f"{self.account_id}_account.pkl"):
-            with open(f"{self.account_id}_account.pkl", "rb") as file:
-                data = pickle.load(file)
-                self.account_id = data['account_id']
-                self.balance = data['balance']
-                self.owner = data['owner']
-                self.transaction_history = data['transaction_history']
-                self.payout_limit = data['payout_limit']
-                self.interest_rate = data['interest_rate']
-                self.password = data['password']
-
     def deposit(self, amount):
         if amount > 0:
             self.balance += amount
             self.add_transaction("Deposit", amount)
             self.save_account_data()  # Save data after deposit
-            print(f'Value {amount} has been added to your bank account, your funds in your account are {self.balance} ')
+            return f'Value {amount} has been added to your bank account.\nYour current balance is {self.balance} PLN.'
         else:
-            print(f"Sorry sir, we cannot add this value: {amount} to your account")
+            return f"Sorry, we cannot add this value: {amount} to your account."
 
     def payout(self, amount):
         if 0 < amount <= self.balance:
@@ -58,19 +55,18 @@ class BankAccount:
                 self.balance -= amount
                 self.add_transaction("Payout", amount)
                 self.save_account_data()  # Save the data after payment
-                print(
-                    f"The payment for the amount {amount} has been processed, your funds in your account are {self.balance} ")
+                return f"The payment for the amount {amount} has been processed.\nYour current balance is {self.balance} PLN."
             else:
-                print(f"The payout amount exceeds the limit of {self.payout_limit}")
+                return f"The payout amount exceeds the limit of {self.payout_limit} PLN."
         else:
-            print("Insufficient funds for the requested payout")
+            return "Insufficient funds for the requested payout."
 
     def set_transactions_limit(self, amount):
         if amount >= 0:
             self.payout_limit = amount
-            print(f"The payout limit has been set to {amount}")
+            return f"The payout limit has been set to {amount} PLN."
         else:
-            print("Invalid payout limit")
+            return "Invalid payout limit."
 
     def get_balance(self):
         return self.balance
@@ -80,16 +76,14 @@ class BankAccount:
         self.transaction_history.append(transaction)
 
     def history_of_the_transactions(self):
-        print("Transaction History:")
-        for transaction in self.transaction_history:
-            print(f"{transaction['type']} of {transaction['amount']}")
+        history = "\n".join([f"{transaction['type']} of {transaction['amount']} PLN" for transaction in self.transaction_history])
+        return f"Transaction History:\n{history}"
 
     def calculate_and_add_interest(self, interest_rate):
         interest_amount = self.balance * interest_rate
         self.balance += interest_amount
         self.add_transaction("Interest rate", interest_amount)
-        print(f'Interest has been added to your account in the amount of {interest_amount}. '
-              f'Your account balance is now {self.balance} ')
+        return f'Interest has been added to your account in the amount of {interest_amount} PLN.\nYour account balance is now {self.balance} PLN.'
 
     def calculate_and_process_payout(self, amount):
         if amount > 400:
@@ -100,28 +94,24 @@ class BankAccount:
         self.balance -= amount
         self.add_transaction("Payout", amount)
         self.calculate_and_add_interest(interest_rate)
-        print(f"Your {amount} withdrawal has been processed. Your account balance is now {self.balance}.")
+        return f"Your {amount} PLN withdrawal has been processed.\nYour account balance is now {self.balance} PLN."
 
     def interest_transactions(self):
-        print("Interest calculation:")
         interest_rate = 0.01
-        self.calculate_and_add_interest(interest_rate)
+        return self.calculate_and_add_interest(interest_rate)
 
     def authenticate(self, entered_password):
         if self.password is not None and entered_password == str(self.password):
-            print("Authentication successful.")
-            return True
+            return "Authentication successful."
         else:
-            print("Wrong password")
-            return False
+            return "Wrong password"
 
     def account_access_by_password(self):
-        entered_password = input("Please enter here your password: ")
+        entered_password = input("Please enter your password: ")
         if self.authenticate(entered_password):
-            print("Access granted")
-            return True
+            return "Access granted"
         else:
-            print("Account access blocked")
+            return "Account access blocked"
 
     def convert_balance(self, target_currency):
         base_currency = 'PLN'
@@ -129,8 +119,9 @@ class BankAccount:
         if exchange_rate:
             amount_to_convert = float(input(f"Enter the amount to convert to {target_currency}: "))
             converted_amount = amount_to_convert / exchange_rate
-            print(f"{amount_to_convert} PLN converted to {target_currency}: {converted_amount}")
-            return converted_amount
+            return f"{amount_to_convert} PLN converted to {target_currency}: {converted_amount}"
         else:
-            print("Conversion failed")
-            return None
+            return "Conversion failed"
+
+
+
