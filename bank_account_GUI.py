@@ -30,11 +30,11 @@ class CurrencyConversionDialog(simpledialog.Dialog):
             return False
 
     def convert(self):
-        if self.validate():
+        if self.validate():  # Waliduj wprowadzoną wartość przed konwersją
             target_currency = self.currency_var.get()
             messagebox.showinfo("Currency Conversion",
                                 f"{self.amount} PLN converted to {target_currency}: {self.amount}")
-            self.destroy()
+            self.destroy()  # Zamyka okno dialogowe po poprawnej konwersji
 
 
 class BankAccountGUI:
@@ -113,48 +113,53 @@ class BankAccountGUI:
         self.quit_button.pack()
 
     def deposit(self):
-        amount = float(simpledialog.askstring("Deposit", "Enter the deposit amount:"))
-        self.account.deposit(amount)
-        messagebox.showinfo("Deposit",
-                            f"Value {amount} has been added to your bank account.\nYour current balance is {self.account.balance} PLN.")
+        amount = simpledialog.askfloat("Deposit", "Enter the deposit amount:")
+        if amount is not None:
+            confirm = messagebox.askyesno("Confirmation", f"Are you sure you want to deposit {amount} PLN?")
+            if confirm:
+                self.account.deposit(amount)
+                messagebox.showinfo("Deposit",
+                                    f"Value {amount} has been added to your bank account.\nYour current balance is {self.account.balance} PLN.")
 
     def payout(self):
-        amount = float(simpledialog.askstring("Payout", "Enter the payout amount:"))
-        self.account.payout(amount)
-        messagebox.showinfo("Payout",
-                            f"The payment for the amount {amount} has been processed.\nYour current balance is {self.account.balance} PLN.")
+        amount = simpledialog.askfloat("Payout", "Enter the payout amount:")
+        if amount is not None:
+            confirm = messagebox.askyesno("Confirmation", f"Are you sure you want to payout {amount} PLN?")
+            if confirm:
+                if amount <= self.account.payout_limit:
+                    if self.account.payout(amount):  # Aktualizacja stanu konta po wypłacie
+                        messagebox.showinfo("Payout",
+                                            f"The payment for the amount {amount} has been processed.\nYour current balance is {self.account.balance} PLN.")
+                    else:
+                        messagebox.showwarning("Insufficient Funds", "You don't have sufficient funds to payout.")
+                else:
+                    messagebox.showwarning("Exceeded Payout Limit",
+                                           f"The payout amount {amount} PLN exceeds the limit of {self.account.payout_limit} PLN.")
 
     def check_balance(self):
-        messagebox.showinfo("Balance", f"Your current balance is {self.account.balance} PLN.")
+        confirm = messagebox.askyesno("Confirmation", "Are you sure you want to check your balance?")
+        if confirm:
+            messagebox.showinfo("Balance", f"Your current balance is {self.account.balance} PLN.")
 
     def transaction_history(self):
-        history = "\n".join([f"{transaction['type']} of {transaction['amount']} PLN" for transaction in
-                             self.account.transaction_history])
-        messagebox.showinfo("Transaction History", f"Transaction History:\n{history}")
+        confirm = messagebox.askyesno("Confirmation", "Are you sure you want to view transaction history?")
+        if confirm:
+            history = "\n".join([f"{transaction['type']} of {transaction['amount']} PLN" for transaction in
+                                 self.account.transaction_history])
+            messagebox.showinfo("Transaction History", f"Transaction History:\n{history}")
 
     def currency_conversion(self):
-        currencies = ["USD", "EUR", "GBP", "AUD"]
-        dialog = CurrencyConversionDialog(self.root, currencies)
-        dialog.wait_window()
-        self.convert(dialog, currencies)
-
-    def convert(self, dialog, currencies):
-        target_currency = dialog.currency_var.get()
-        amount = dialog.amount
-        if self.account.balance > 0:
-            converted_amount = self.account.convert_balance(target_currency)
-            if converted_amount is not None:
-                current_balance_info = "\n".join(
-                    [f"{currency}: {self.account.convert_balance(currency)} {currency}" for currency in currencies])
-                messagebox.showinfo("Current Balance",
-                                    f"Your current balance in different currencies:\n{current_balance_info}")
-                messagebox.showinfo("Currency Conversion",
-                                    f"{amount} PLN converted to {target_currency}: {converted_amount}")
-        else:
-            messagebox.showwarning("Insufficient Funds", "You don't have sufficient funds to convert.")
+        confirm = messagebox.askyesno("Confirmation", "Are you sure you want to convert currency?")
+        if confirm:
+            currencies = ["USD", "EUR", "GBP", "AUD"]  # Lista dostępnych walut
+            dialog = CurrencyConversionDialog(self.root, currencies)
+            dialog.wait_window(dialog.top)  # Czekaj na zamknięcie okna dialogowego
 
 
 root = tk.Tk()
 app = BankAccountGUI(root)
 root.mainloop()
+
+
+
 

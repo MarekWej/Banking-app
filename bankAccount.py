@@ -55,11 +55,11 @@ class BankAccount:
                 self.balance -= amount
                 self.add_transaction("Payout", amount)
                 self.save_account_data()  # Save the data after payment
-                return f"The payment for the amount {amount} has been processed.\nYour current balance is {self.balance} PLN."
+                return True
             else:
-                return f"The payout amount exceeds the limit of {self.payout_limit} PLN."
+                return False
         else:
-            return "Insufficient funds for the requested payout."
+            return False
 
     def set_transactions_limit(self, amount):
         if amount >= 0:

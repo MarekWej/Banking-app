@@ -16,5 +16,3 @@ class SavingsAccount(BankAccount):
 
     def add_transaction(self, transaction_type, amount):
         super().add_transaction(transaction_type, amount)
-
-
