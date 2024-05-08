@@ -19,9 +19,11 @@ class BankAccount:
             with open(filename, "rb") as file:
                 data = pickle.load(file)
                 if data['password'] == password:
-                    return cls(account_id=data['account_id'], balance=data['balance'], owner=data['owner'],
-                               payout_limit=data['payout_limit'], interest_rate=data['interest_rate'],
-                               password=data['password'])
+                    account = cls(account_id=data['account_id'], balance=data['balance'], owner=data['owner'],
+                                  payout_limit=data['payout_limit'], interest_rate=data['interest_rate'],
+                                  password=data['password'])
+                    account.transaction_history = data.get('transaction_history', [])  # Dodaj historię transakcji
+                    return account
                 else:
                     return None
         else:
@@ -37,8 +39,11 @@ class BankAccount:
             'interest_rate': self.interest_rate,
             'password': self.password
         }
-        with open(f"{self.account_id}_account.pkl", "wb") as file:
-            pickle.dump(data, file)
+        try:
+            with open(f"{self.account_id}_account.pkl", "wb") as file:
+                pickle.dump(data, file)
+        except Exception as e:
+            print("Error occurred while saving account data:", e)
 
     def deposit(self, amount):
         if amount > 0:

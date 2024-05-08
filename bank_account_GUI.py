@@ -2,108 +2,136 @@ import tkinter as tk
 from tkinter import simpledialog, messagebox
 from bankAccount import BankAccount
 
+
 class BankAccountGUI:
     def __init__(self, root):
         self.root = root
-        self.root.title("Banking System")
-        self.root.geometry("500x800")  # Ustawienie rozmiaru okna
+        self.root.geometry("500x800")
+        self.current_frame = None
         self.account = None
-        self.create_widgets()
+        self.account_id = None
+        self.password = None
+        self.create_login_menu()
 
-    def create_widgets(self):
-        # Zmiana rozmiaru czcionki etykiety
-        self.label = tk.Label(self.root, text="Welcome to the banking system!", font=("Helvetica", 16))
-        self.label.pack(pady=20)  # Dodanie odstępu na górze
+    def create_login_menu(self):
+        if self.current_frame:
+            self.current_frame.destroy()
 
-        # Zwiększenie rozmiaru przycisków
-        self.login_button = tk.Button(self.root, text="Login", command=self.login, height=2, width=20, font=("Helvetica", 12))
-        self.login_button.pack()
+        self.current_frame = tk.Frame(self.root)
+        self.current_frame.pack()
 
-        self.create_account_button = tk.Button(self.root, text="Create Account", command=self.create_account, height=2, width=20, font=("Helvetica", 12))
-        self.create_account_button.pack()
+        tk.Label(self.current_frame, text="Welcome to the banking system!", font=("Arial", 20)).pack(pady=20)
+        login_button = tk.Button(self.current_frame, text="Login", command=self.show_login_form)
+        login_button.pack()
+        tk.Button(self.current_frame, text="Create Account", command=self.show_create_account_form).pack()
+
+    def show_login_form(self):
+        self.clear_current_frame()
+        tk.Label(self.current_frame, text="Enter your account ID:").pack()
+        self.account_id_entry = tk.Entry(self.current_frame)
+        self.account_id_entry.pack()
+
+        tk.Label(self.current_frame, text="Enter your password:").pack()
+        self.password_entry = tk.Entry(self.current_frame, show="*")
+        self.password_entry.pack()
+
+        tk.Button(self.current_frame, text="Login", command=self.login).pack()
+        tk.Button(self.current_frame, text="Back", command=self.create_login_menu).pack()
+
+    def show_create_account_form(self):
+        self.clear_current_frame()
+        tk.Label(self.current_frame, text="Enter your account ID:").pack()
+        self.create_account_id_entry = tk.Entry(self.current_frame)
+        self.create_account_id_entry.pack()
+
+        tk.Label(self.current_frame, text="Enter your password:").pack()
+        self.create_password_entry = tk.Entry(self.current_frame, show="*")
+        self.create_password_entry.pack()
+
+        tk.Label(self.current_frame, text="Enter your name:").pack()
+        self.create_owner_entry = tk.Entry(self.current_frame)
+        self.create_owner_entry.pack()
+
+        tk.Label(self.current_frame, text="Enter your payout limit:").pack()
+        self.create_payout_limit_entry = tk.Entry(self.current_frame)
+        self.create_payout_limit_entry.pack()
+
+        tk.Label(self.current_frame, text="Enter your interest rate:").pack()
+        self.create_interest_rate_entry = tk.Entry(self.current_frame)
+        self.create_interest_rate_entry.pack()
+
+        tk.Button(self.current_frame, text="Create Account", command=self.create_account).pack()
+        tk.Button(self.current_frame, text="Back", command=self.create_login_menu).pack()
 
     def login(self):
-        account_id = simpledialog.askstring("Login", "Enter your account ID:")
-        password = simpledialog.askstring("Login", "Enter your password:", show="*")
-        self.account = BankAccount.load_account_data(account_id, password)
+        self.account_id = self.account_id_entry.get()
+        self.password = self.password_entry.get()
+        self.account = BankAccount.load_account_data(self.account_id, self.password)
         if self.account:
             self.show_menu()
         else:
             messagebox.showerror("Error", "Invalid credentials.")
 
     def create_account(self):
-        account_id = simpledialog.askstring("Create Account", "Enter your account ID:")
-        owner = simpledialog.askstring("Create Account", "Enter your name:")
-        initial_balance = float(simpledialog.askstring("Create Account", "Enter the initial balance:"))
-        payout_limit = float(simpledialog.askstring("Create Account", "Enter the payout limit:"))
-        password = simpledialog.askstring("Create Account", "Set a password for your account:", show="*")
-
-        self.account = BankAccount(account_id, balance=initial_balance, owner=owner, payout_limit=payout_limit,
-                                   password=password)
-
+        account_id = self.create_account_id_entry.get()
+        password = self.create_password_entry.get()
+        owner = self.create_owner_entry.get()
+        payout_limit = float(self.create_payout_limit_entry.get())
+        interest_rate = float(self.create_interest_rate_entry.get())
+        self.account = BankAccount(account_id, 0, owner, payout_limit, interest_rate, password=password)
         self.account.save_account_data()
         messagebox.showinfo("Success", "Account created successfully.")
         self.show_menu()
 
     def show_menu(self):
-        self.label.pack_forget()
-        self.login_button.pack_forget()
-        self.create_account_button.pack_forget()
+        self.clear_current_frame()
 
-        self.deposit_button = tk.Button(self.root, text="Deposit", command=self.deposit, height=2, width=20,
-                                        font=("Helvetica", 12))
-        self.deposit_button.pack()
+        self.deposit_button = tk.Button(self.current_frame, text="Deposit", command=self.deposit,
+                                        font=("Helvetica", 14))
+        self.deposit_button.pack(pady=10)
 
-        self.payout_button = tk.Button(self.root, text="Payout", command=self.payout, height=2, width=20,
-                                       font=("Helvetica", 12))
-        self.payout_button.pack()
+        self.payout_button = tk.Button(self.current_frame, text="Payout", command=self.payout, font=("Helvetica", 14))
+        self.payout_button.pack(pady=10)
 
-        self.check_balance_button = tk.Button(self.root, text="Check Balance", command=self.check_balance, height=2,
-                                              width=20, font=("Helvetica", 12))
-        self.check_balance_button.pack()
+        self.check_balance_button = tk.Button(self.current_frame, text="Check Balance", command=self.check_balance,
+                                              font=("Helvetica", 14))
+        self.check_balance_button.pack(pady=10)
 
-        self.transaction_history_button = tk.Button(self.root, text="Transaction History",
-                                                    command=self.transaction_history, height=2, width=20,
-                                                    font=("Helvetica", 12))
-        self.transaction_history_button.pack()
+        self.transaction_history_button = tk.Button(self.current_frame, text="Transaction History",
+                                                    command=self.transaction_history, font=("Helvetica", 14))
+        self.transaction_history_button.pack(pady=10)
 
-        self.quit_button = tk.Button(self.root, text="Quit", command=self.root.destroy, height=2, width=20,
-                                     font=("Helvetica", 12))
-        self.quit_button.pack()
+        self.quit_button = tk.Button(self.current_frame, text="Quit", command=self.root.destroy, font=("Helvetica", 14))
+        self.quit_button.pack(pady=10)
 
     def deposit(self):
         amount = simpledialog.askfloat("Deposit", "Enter the deposit amount:")
         if amount is not None:
-            confirm = messagebox.askyesno("Confirmation", f"Are you sure you want to deposit {amount} PLN?")
-            if confirm:
-                self.account.deposit(amount)
-                messagebox.showinfo("Deposit",
-                                    f"Value {amount} has been added to your bank account.\nYour current balance is {self.account.balance} PLN.")
+            self.account.deposit(amount)
+            self.account.save_account_data()  # Zapisuje dane po operacji depozytu
+            messagebox.showinfo("Deposit",
+                                f"Value {amount} has been added to your bank account.\nYour current balance is {self.account.balance} PLN.")
 
     def payout(self):
         amount = simpledialog.askfloat("Payout", "Enter the payout amount:")
         if amount is not None:
-            if amount <= self.account.payout_limit:
-                confirm = messagebox.askyesno("Confirmation", f"Are you sure you want to payout {amount} PLN?")
-                if confirm:
-                    if self.account.payout(amount):  # Aktualizacja stanu konta po wypłacie
-                        messagebox.showinfo("Payout",
-                                            f"The payment for the amount {amount} has been processed.\nYour current balance is {self.account.balance} PLN.")
-                    else:
-                        messagebox.showwarning("Insufficient Funds", "You don't have sufficient funds to payout.")
+            if self.account.payout(amount):
+                self.account.save_account_data()  # Zapisuje dane po operacji wypłaty
+                messagebox.showinfo("Payout",
+                                    f"The payment for the amount {amount} has been processed.\nYour current balance is {self.account.balance} PLN.")
             else:
-                messagebox.showwarning("Exceeded Payout Limit", f"The payout amount exceeds the payout limit of {self.account.payout_limit} PLN.")
+                messagebox.showwarning("Insufficient Funds", "You don't have sufficient funds to payout.")
 
     def check_balance(self):
-        confirm = messagebox.askyesno("Confirmation", "Are you sure you want to check your balance?")
-        if confirm:
-            messagebox.showinfo("Balance", f"Your current balance is {self.account.balance} PLN.")
+        messagebox.showinfo("Balance", f"Your current balance is {self.account.balance} PLN.")
 
     def transaction_history(self):
-        confirm = messagebox.askyesno("Confirmation", "Are you sure you want to view transaction history?")
-        if confirm:
-            history = "\n".join([f"{transaction['type']} of {transaction['amount']} PLN" for transaction in
-                                 self.account.transaction_history])
-            messagebox.showinfo("Transaction History", f"Transaction History:\n{history}")
+        history = "\n".join([f"{transaction['type']} of {transaction['amount']} PLN" for transaction in
+                             self.account.transaction_history])
+        messagebox.showinfo("Transaction History", f"Transaction History:\n{history}")
 
-
+    def clear_current_frame(self):
+        if self.current_frame:
+            self.current_frame.destroy()
+        self.current_frame = tk.Frame(self.root)
+        self.current_frame.pack()
