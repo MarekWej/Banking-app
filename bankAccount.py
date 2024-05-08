@@ -1,6 +1,6 @@
 import os.path
 import pickle
-from currency_exchange import get_exchange_rate
+
 
 class BankAccount:
     def __init__(self, account_id, balance, owner, payout_limit, interest_rate=0.01, password=None):
@@ -76,7 +76,8 @@ class BankAccount:
         self.transaction_history.append(transaction)
 
     def history_of_the_transactions(self):
-        history = "\n".join([f"{transaction['type']} of {transaction['amount']} PLN" for transaction in self.transaction_history])
+        history = "\n".join(
+            [f"{transaction['type']} of {transaction['amount']} PLN" for transaction in self.transaction_history])
         return f"Transaction History:\n{history}"
 
     def calculate_and_add_interest(self, interest_rate):
@@ -112,16 +113,3 @@ class BankAccount:
             return "Access granted"
         else:
             return "Account access blocked"
-
-    def convert_balance(self, target_currency):
-        base_currency = 'PLN'
-        exchange_rate = get_exchange_rate(base_currency, target_currency)
-        if exchange_rate:
-            amount_to_convert = float(input(f"Enter the amount to convert to {target_currency}: "))
-            converted_amount = amount_to_convert / exchange_rate
-            return f"{amount_to_convert} PLN converted to {target_currency}: {converted_amount}"
-        else:
-            return "Conversion failed"
-
-
-
