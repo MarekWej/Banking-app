@@ -1,7 +1,6 @@
 import os.path
 import pickle
 
-
 class BankAccount:
     def __init__(self, account_id, balance, owner, payout_limit, interest_rate=0.01, password=None):
         self.account_id = account_id
@@ -55,16 +54,15 @@ class BankAccount:
             return f"Sorry, we cannot add this value: {amount} to your account."
 
     def payout(self, amount):
-        if 0 < amount <= self.balance:
-            if amount <= self.payout_limit:
-                self.balance -= amount
-                self.add_transaction("Payout", amount)
-                self.save_account_data()  # Save the data after payment
-                return True
-            else:
-                return False
+        if amount > self.balance:
+            return "Insufficient funds. You don't have enough money for this payout."
+        elif amount > self.payout_limit:
+            return f"Exceeded payout limit. Your payout limit is {self.payout_limit} PLN."
         else:
-            return False
+            self.balance -= amount
+            self.add_transaction("Payout", amount)
+            self.save_account_data()  # Zapisz dane po wypłacie
+            return True
 
     def set_transactions_limit(self, amount):
         if amount >= 0:

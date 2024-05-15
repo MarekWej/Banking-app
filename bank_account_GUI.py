@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import simpledialog, messagebox
 from bankAccount import BankAccount
 
-
 class BankAccountGUI:
     def __init__(self, root):
         self.root = root
@@ -115,12 +114,15 @@ class BankAccountGUI:
     def payout(self):
         amount = simpledialog.askfloat("Payout", "Enter the payout amount:")
         if amount is not None:
-            if self.account.payout(amount):
+            result = self.account.payout(amount)  # Sprawdzamy wynik wypłaty
+            if result is True:
                 self.account.save_account_data()  # Zapisuje dane po operacji wypłaty
                 messagebox.showinfo("Payout",
                                     f"The payment for the amount {amount} has been processed.\nYour current balance is {self.account.balance} PLN.")
-            else:
+            elif result == "Insufficient funds. You don't have enough money for this payout.":
                 messagebox.showwarning("Insufficient Funds", "You don't have sufficient funds to payout.")
+            elif result.startswith("Exceeded payout limit"):
+                messagebox.showwarning("Exceeded Limit", result)
 
     def check_balance(self):
         messagebox.showinfo("Balance", f"Your current balance is {self.account.balance} PLN.")
