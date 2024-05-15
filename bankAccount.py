@@ -1,6 +1,7 @@
 import os.path
 import pickle
 
+
 class BankAccount:
     def __init__(self, account_id, balance, owner, payout_limit, interest_rate=0.01, password=None):
         self.account_id = account_id
