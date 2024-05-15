@@ -1,7 +1,6 @@
 import os.path
 import pickle
 
-
 class BankAccount:
     def __init__(self, account_id, balance, owner, payout_limit, interest_rate=0.01, password=None):
         self.account_id = account_id
@@ -71,6 +70,17 @@ class BankAccount:
             return f"The payout limit has been set to {amount} PLN."
         else:
             return "Invalid payout limit."
+
+    def change_password(self, old_password, new_password):
+        if old_password == self.password:
+            if new_password != old_password:
+                self.password = new_password
+                self.save_account_data()  # Save data after changing password
+                return "Password changed successfully."
+            else:
+                return "New password cannot be the same as the old one."
+        else:
+            return "Incorrect old password. Password change failed."
 
     def get_balance(self):
         return self.balance

@@ -2,11 +2,10 @@ import tkinter as tk
 from tkinter import simpledialog, messagebox
 from bankAccount import BankAccount
 
-
 class BankAccountGUI:
     def __init__(self, root):
         self.root = root
-        self.root.geometry("500x300")
+        self.root.geometry("500x350")
         self.current_frame = None
         self.account = None
         self.account_id = None
@@ -90,7 +89,8 @@ class BankAccountGUI:
                                         font=("Helvetica", 14))
         self.deposit_button.pack(pady=10)
 
-        self.payout_button = tk.Button(self.current_frame, text="Payout", command=self.payout, font=("Helvetica", 14))
+        self.payout_button = tk.Button(self.current_frame, text="Payout", command=self.payout,
+                                       font=("Helvetica", 14))
         self.payout_button.pack(pady=10)
 
         self.check_balance_button = tk.Button(self.current_frame, text="Check Balance", command=self.check_balance,
@@ -101,7 +101,12 @@ class BankAccountGUI:
                                                     command=self.transaction_history, font=("Helvetica", 14))
         self.transaction_history_button.pack(pady=10)
 
-        self.quit_button = tk.Button(self.current_frame, text="Quit", command=self.root.destroy, font=("Helvetica", 14))
+        self.change_password_button = tk.Button(self.current_frame, text="Change Password",
+                                                command=self.change_password_form, font=("Helvetica", 14))
+        self.change_password_button.pack(pady=10)
+
+        self.quit_button = tk.Button(self.current_frame, text="Quit", command=self.root.destroy,
+                                     font=("Helvetica", 14))
         self.quit_button.pack(pady=10)
 
     def deposit(self):
@@ -132,6 +137,14 @@ class BankAccountGUI:
         history = "\n".join([f"{transaction['type']} of {transaction['amount']} PLN" for transaction in
                              self.account.transaction_history])
         messagebox.showinfo("Transaction History", f"Transaction History:\n{history}")
+
+    def change_password_form(self):
+        old_password = simpledialog.askstring("Change Password", "Enter your old password:", show="*")
+        if old_password is not None:
+            new_password = simpledialog.askstring("Change Password", "Enter your new password:", show="*")
+            if new_password is not None:
+                result = self.account.change_password(old_password, new_password)
+                messagebox.showinfo("Change Password", result)
 
     def clear_current_frame(self):
         if self.current_frame:
