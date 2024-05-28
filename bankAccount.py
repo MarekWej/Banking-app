@@ -21,7 +21,7 @@ class BankAccount:
                     account = cls(account_id=data['account_id'], balance=data['balance'], owner=data['owner'],
                                   payout_limit=data['payout_limit'], interest_rate=data['interest_rate'],
                                   password=data['password'])
-                    account.transaction_history = data.get('transaction_history', [])  # Dodaj historię transakcji
+                    account.transaction_history = data.get('transaction_history', [])
                     return account
                 else:
                     return None
@@ -48,12 +48,14 @@ class BankAccount:
         if amount > 0:
             self.balance += amount
             self.add_transaction("Deposit", amount)
-            self.save_account_data()  # Save data after deposit
+            self.save_account_data()
             return f'Value {amount} has been added to your bank account.\nYour current balance is {self.balance} PLN.'
         else:
             return f"Sorry, we cannot add this value: {amount} to your account."
 
     def payout(self, amount):
+        if amount <= 0:
+            return "Payout amount must be positive."
         if amount > self.balance:
             return "Insufficient funds. You don't have enough money for this payout."
         elif amount > self.payout_limit:
@@ -61,12 +63,13 @@ class BankAccount:
         else:
             self.balance -= amount
             self.add_transaction("Payout", amount)
-            self.save_account_data()  # Zapisz dane po wypłacie
+            self.save_account_data()
             return True
 
     def set_transactions_limit(self, amount):
         if amount >= 0:
             self.payout_limit = amount
+            self.save_account_data()
             return f"The payout limit has been set to {amount} PLN."
         else:
             return "Invalid payout limit."
@@ -75,7 +78,7 @@ class BankAccount:
         if old_password == self.password:
             if new_password != old_password:
                 self.password = new_password
-                self.save_account_data()  # Save data after changing password
+                self.save_account_data()
                 return "Password changed successfully."
             else:
                 return "New password cannot be the same as the old one."
@@ -83,7 +86,7 @@ class BankAccount:
             return "Incorrect old password. Password change failed."
 
     def get_balance(self):
-        return self.balance
+        return f"{self.balance:.2f}"
 
     def add_transaction(self, transaction_type, amount):
         transaction = {"type": transaction_type, "amount": amount}

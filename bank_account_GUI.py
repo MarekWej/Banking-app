@@ -5,7 +5,7 @@ from bankAccount import BankAccount
 class BankAccountGUI:
     def __init__(self, root):
         self.root = root
-        self.root.geometry("500x350")
+        self.root.geometry("500x800")
         self.current_frame = None
         self.account = None
         self.account_id = None
@@ -76,6 +76,9 @@ class BankAccountGUI:
         password = self.create_password_entry.get()
         owner = self.create_owner_entry.get()
         payout_limit = float(self.create_payout_limit_entry.get())
+        if payout_limit < 0:
+            messagebox.showerror("Error", "Payout limit must be non-negative.")
+            return
         interest_rate = float(self.create_interest_rate_entry.get())
         self.account = BankAccount(account_id, 0, owner, payout_limit, interest_rate, password=password)
         self.account.save_account_data()
@@ -105,33 +108,27 @@ class BankAccountGUI:
                                                 command=self.change_password_form, font=("Helvetica", 14))
         self.change_password_button.pack(pady=10)
 
-        self.quit_button = tk.Button(self.current_frame, text="Quit", command=self.root.destroy,
-                                     font=("Helvetica", 14))
+        self.quit_button = tk.Button(self.current_frame, text="Quit", command=self.root.destroy, font=("Helvetica", 14))
         self.quit_button.pack(pady=10)
 
     def deposit(self):
         amount = simpledialog.askfloat("Deposit", "Enter the deposit amount:")
         if amount is not None:
-            self.account.deposit(amount)
-            self.account.save_account_data()  # Zapisuje dane po operacji depozytu
-            messagebox.showinfo("Deposit",
-                                f"Value {amount} has been added to your bank account.\nYour current balance is {self.account.balance} PLN.")
+            message = self.account.deposit(amount)
+            messagebox.showinfo("Deposit", message)
 
     def payout(self):
         amount = simpledialog.askfloat("Payout", "Enter the payout amount:")
         if amount is not None:
             result = self.account.payout(amount)
             if result is True:
-                self.account.save_account_data()
                 messagebox.showinfo("Payout",
                                     f"The payment for the amount {amount} has been processed.\nYour current balance is {self.account.balance} PLN.")
-            elif result == "Insufficient funds. You don't have enough money for this payout.":
-                messagebox.showwarning("Insufficient Funds", "You don't have sufficient funds to payout.")
-            elif result.startswith("Exceeded payout limit"):
-                messagebox.showwarning("Exceeded Limit", result)
+            else:
+                messagebox.showwarning("Payout Error", result)
 
     def check_balance(self):
-        messagebox.showinfo("Balance", f"Your current balance is {self.account.balance} PLN.")
+        messagebox.showinfo("Balance", f"Your current balance is {self.account.get_balance()} PLN.")
 
     def transaction_history(self):
         history = "\n".join([f"{transaction['type']} of {transaction['amount']} PLN" for transaction in
