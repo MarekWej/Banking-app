@@ -55,10 +55,6 @@ class BankAccountGUI:
         self.create_payout_limit_entry = tk.Entry(self.current_frame)
         self.create_payout_limit_entry.pack()
 
-        tk.Label(self.current_frame, text="Enter your interest rate:").pack()
-        self.create_interest_rate_entry = tk.Entry(self.current_frame)
-        self.create_interest_rate_entry.pack()
-
         tk.Button(self.current_frame, text="Create Account", command=self.create_account).pack()
         tk.Button(self.current_frame, text="Back", command=self.create_login_menu).pack()
 
@@ -75,12 +71,23 @@ class BankAccountGUI:
         account_id = self.create_account_id_entry.get()
         password = self.create_password_entry.get()
         owner = self.create_owner_entry.get()
-        payout_limit = float(self.create_payout_limit_entry.get())
-        if payout_limit < 0:
-            messagebox.showerror("Error", "Payout limit must be non-negative.")
+        payout_limit = self.create_payout_limit_entry.get()
+
+        # Check if any field is empty
+        if not account_id or not password or not owner or not payout_limit:
+            messagebox.showerror("Error", "All fields must be filled out to create an account.")
             return
-        interest_rate = float(self.create_interest_rate_entry.get())
-        self.account = BankAccount(account_id, 0, owner, payout_limit, interest_rate, password=password)
+
+        # Ensure payout limit is a valid number
+        try:
+            payout_limit = float(payout_limit)
+            if payout_limit < 0:
+                raise ValueError("Payout limit cannot be negative.")
+        except ValueError:
+            messagebox.showerror("Error", "Payout limit must be a positive number.")
+            return
+
+        self.account = BankAccount(account_id, 0, owner, payout_limit, password=password)
         self.account.save_account_data()
         messagebox.showinfo("Success", "Account created successfully.")
         self.show_menu()
@@ -88,24 +95,19 @@ class BankAccountGUI:
     def show_menu(self):
         self.clear_current_frame()
 
-        self.deposit_button = tk.Button(self.current_frame, text="Deposit", command=self.deposit,
-                                        font=("Helvetica", 14))
+        self.deposit_button = tk.Button(self.current_frame, text="Deposit", command=self.deposit, font=("Helvetica", 14))
         self.deposit_button.pack(pady=10)
 
-        self.payout_button = tk.Button(self.current_frame, text="Payout", command=self.payout,
-                                       font=("Helvetica", 14))
+        self.payout_button = tk.Button(self.current_frame, text="Payout", command=self.payout, font=("Helvetica", 14))
         self.payout_button.pack(pady=10)
 
-        self.check_balance_button = tk.Button(self.current_frame, text="Check Balance", command=self.check_balance,
-                                              font=("Helvetica", 14))
+        self.check_balance_button = tk.Button(self.current_frame, text="Check Balance", command=self.check_balance, font=("Helvetica", 14))
         self.check_balance_button.pack(pady=10)
 
-        self.transaction_history_button = tk.Button(self.current_frame, text="Transaction History",
-                                                    command=self.transaction_history, font=("Helvetica", 14))
+        self.transaction_history_button = tk.Button(self.current_frame, text="Transaction History", command=self.transaction_history, font=("Helvetica", 14))
         self.transaction_history_button.pack(pady=10)
 
-        self.change_password_button = tk.Button(self.current_frame, text="Change Password",
-                                                command=self.change_password_form, font=("Helvetica", 14))
+        self.change_password_button = tk.Button(self.current_frame, text="Change Password", command=self.change_password, font=("Helvetica", 14))
         self.change_password_button.pack(pady=10)
 
         self.quit_button = tk.Button(self.current_frame, text="Quit", command=self.root.destroy, font=("Helvetica", 14))
@@ -115,6 +117,7 @@ class BankAccountGUI:
         amount = simpledialog.askfloat("Deposit", "Enter the deposit amount:")
         if amount is not None:
             message = self.account.deposit(amount)
+            self.account.save_account_data()
             messagebox.showinfo("Deposit", message)
 
     def payout(self):
@@ -122,26 +125,24 @@ class BankAccountGUI:
         if amount is not None:
             result = self.account.payout(amount)
             if result is True:
-                messagebox.showinfo("Payout",
-                                    f"The payment for the amount {amount} has been processed.\nYour current balance is {self.account.balance} PLN.")
+                self.account.save_account_data()
+                messagebox.showinfo("Payout", f"The payment for the amount {amount} has been processed.\nYour current balance is {self.account.get_balance()} PLN.")
             else:
-                messagebox.showwarning("Payout Error", result)
+                messagebox.showwarning("Error", result)
 
     def check_balance(self):
         messagebox.showinfo("Balance", f"Your current balance is {self.account.get_balance()} PLN.")
 
     def transaction_history(self):
-        history = "\n".join([f"{transaction['type']} of {transaction['amount']} PLN" for transaction in
-                             self.account.transaction_history])
+        history = "\n".join([f"{transaction['type']} of {transaction['amount']} PLN" for transaction in self.account.transaction_history])
         messagebox.showinfo("Transaction History", f"Transaction History:\n{history}")
 
-    def change_password_form(self):
-        old_password = simpledialog.askstring("Change Password", "Enter your old password:", show="*")
-        if old_password is not None:
-            new_password = simpledialog.askstring("Change Password", "Enter your new password:", show="*")
-            if new_password is not None:
-                result = self.account.change_password(old_password, new_password)
-                messagebox.showinfo("Change Password", result)
+    def change_password(self):
+        old_password = simpledialog.askstring("Change Password", "Enter your current password:", show="*")
+        new_password = simpledialog.askstring("Change Password", "Enter your new password:", show="*")
+        if old_password and new_password:
+            result = self.account.change_password(old_password, new_password)
+            messagebox.showinfo("Change Password", result)
 
     def clear_current_frame(self):
         if self.current_frame:
