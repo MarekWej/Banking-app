@@ -5,7 +5,7 @@ from bankAccount import BankAccount
 class BankAccountGUI:
     def __init__(self, root):
         self.root = root
-        self.root.geometry("500x800")
+        self.root.geometry("500x500")
         self.current_frame = None
         self.account = None
         self.account_id = None
@@ -78,7 +78,6 @@ class BankAccountGUI:
             messagebox.showerror("Error", "All fields must be filled out to create an account.")
             return
 
-        # Ensure payout limit is a valid number
         try:
             payout_limit = float(payout_limit)
             if payout_limit < 0:

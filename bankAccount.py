@@ -45,7 +45,7 @@ class BankAccount:
         if amount > 0:
             self.balance += amount
             self.add_transaction("Deposit", amount)
-            self.save_account_data()  # Save data after deposit
+            self.save_account_data()
             return f'Value {amount} has been added to your bank account.\nYour current balance is {self.balance:.2f} PLN.'
         else:
             return f"Sorry, we cannot add this value: {amount} to your account."
@@ -60,13 +60,13 @@ class BankAccount:
         else:
             self.balance -= amount
             self.add_transaction("Payout", amount)
-            self.save_account_data()  # Zapisz dane po wypłacie
+            self.save_account_data()
             return True
 
     def set_transactions_limit(self, amount):
         if amount >= 0:
             self.payout_limit = amount
-            self.save_account_data()  # Save data after setting the limit
+            self.save_account_data()
             return f"The payout limit has been set to {amount} PLN."
         else:
             return "Invalid payout limit. It must be a non-negative value."
