@@ -19,7 +19,7 @@ class BankAccount:
                 if data['password'] == password:
                     account = cls(account_id=data['account_id'], balance=data['balance'], owner=data['owner'],
                                   payout_limit=data['payout_limit'], password=data['password'])
-                    account.transaction_history = data.get('transaction_history', [])  # Dodaj historię transakcji
+                    account.transaction_history = data.get('transaction_history', [])
                     return account
                 else:
                     return None
@@ -46,62 +46,35 @@ class BankAccount:
             self.balance += amount
             self.add_transaction("Deposit", amount)
             self.save_account_data()
-            return f'Value {amount} has been added to your bank account.\nYour current balance is {self.balance:.2f} PLN.'
+            return f'Value {amount} has been added to your account.\nYour current balance is {self.balance:.2f} PLN.'
         else:
-            return f"Sorry, we cannot add this value: {amount} to your account."
+            return 'Deposit amount must be positive.'
 
     def payout(self, amount):
         if amount <= 0:
-            return "Invalid payout amount. The amount must be positive."
+            return "The payout amount must be positive."
         if amount > self.balance:
-            return "Insufficient funds. You don't have enough money for this payout."
-        elif amount > self.payout_limit:
-            return f"Exceeded payout limit. Your payout limit is {self.payout_limit:.2f} PLN."
-        else:
-            self.balance -= amount
-            self.add_transaction("Payout", amount)
-            self.save_account_data()
-            return True
-
-    def set_transactions_limit(self, amount):
-        if amount >= 0:
-            self.payout_limit = amount
-            self.save_account_data()
-            return f"The payout limit has been set to {amount} PLN."
-        else:
-            return "Invalid payout limit. It must be a non-negative value."
+            return "You don't have sufficient funds to payout."
+        if amount > self.payout_limit:
+            return f"The amount exceeds your payout limit of {self.payout_limit} PLN."
+        self.balance -= amount
+        self.add_transaction("Payout", amount)
+        self.save_account_data()
+        return True
 
     def get_balance(self):
-        return f"{self.balance:.2f}"
+        return f'{self.balance:.2f}'
 
     def add_transaction(self, transaction_type, amount):
-        transaction = {"type": transaction_type, "amount": amount}
-        self.transaction_history.append(transaction)
-
-    def history_of_the_transactions(self):
-        history = "\n".join(
-            [f"{transaction['type']} of {transaction['amount']} PLN" for transaction in self.transaction_history])
-        return f"Transaction History:\n{history}"
-
-    def authenticate(self, entered_password):
-        if self.password is not None and entered_password == str(self.password):
-            return "Authentication successful."
-        else:
-            return "Wrong password"
-
-    def account_access_by_password(self):
-        entered_password = input("Please enter your password: ")
-        if self.authenticate(entered_password):
-            return "Access granted"
-        else:
-            return "Account access blocked"
+        self.transaction_history.append({"type": transaction_type, "amount": amount})
 
     def change_password(self, old_password, new_password):
-        if old_password != self.password:
-            return "Old password is incorrect."
-        elif new_password == self.password:
-            return "New password cannot be the same as the old password."
-        else:
+        if self.password == old_password:
+            if self.password == new_password:
+                return "New password cannot be the same as the old password."
             self.password = new_password
             self.save_account_data()
             return "Password changed successfully."
+        else:
+            return "Current password is incorrect."
+

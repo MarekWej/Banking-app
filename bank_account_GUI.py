@@ -2,10 +2,31 @@ import tkinter as tk
 from tkinter import simpledialog, messagebox
 from bankAccount import BankAccount
 
+class ChangePasswordDialog(simpledialog.Dialog):
+    def body(self, master):
+        tk.Label(master, text="Enter your current password:").grid(row=0)
+        self.old_password_entry = tk.Entry(master, show="*")
+        self.old_password_entry.grid(row=0, column=1)
+
+        tk.Label(master, text="Enter your new password:").grid(row=1)
+        self.new_password_entry = tk.Entry(master, show="*")
+        self.new_password_entry.grid(row=1, column=1)
+
+        return self.old_password_entry
+
+    def apply(self):
+        self.old_password = self.old_password_entry.get()
+        self.new_password = self.new_password_entry.get()
+
+        if not self.old_password or not self.new_password:
+            messagebox.showerror("Error", "Both fields must be filled out to change the password.")
+            self.old_password = None
+            self.new_password = None
+
 class BankAccountGUI:
     def __init__(self, root):
         self.root = root
-        self.root.geometry("500x500")
+        self.root.geometry("500x380")
         self.current_frame = None
         self.account = None
         self.account_id = None
@@ -137,10 +158,9 @@ class BankAccountGUI:
         messagebox.showinfo("Transaction History", f"Transaction History:\n{history}")
 
     def change_password(self):
-        old_password = simpledialog.askstring("Change Password", "Enter your current password:", show="*")
-        new_password = simpledialog.askstring("Change Password", "Enter your new password:", show="*")
-        if old_password and new_password:
-            result = self.account.change_password(old_password, new_password)
+        dialog = ChangePasswordDialog(self.root)
+        if dialog.old_password and dialog.new_password:
+            result = self.account.change_password(dialog.old_password, dialog.new_password)
             messagebox.showinfo("Change Password", result)
 
     def clear_current_frame(self):
